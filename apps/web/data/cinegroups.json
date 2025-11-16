@@ -1,0 +1,44 @@
+[
+  {
+    "id": "cg_3n1yc18",
+    "name": "Kunal Londhe's list for Rohit Sharma",
+    "ownerId": "user_mock_123",
+    "memberIds": [
+      "user_mock_123",
+      "friend_1"
+    ],
+    "createdAt": "2025-11-16T11:33:36.355Z"
+  },
+  {
+    "id": "cg_6cfgqcu",
+    "name": "Kunal Londhe's list for Priya Singh",
+    "ownerId": "user_mock_123",
+    "memberIds": [
+      "user_mock_123",
+      "friend_2"
+    ],
+    "createdAt": "2025-11-16T11:33:36.924Z"
+  },
+  {
+    "id": "cg_d1fpzk0",
+    "name": "sick movies",
+    "ownerId": "user_mock_123",
+    "memberIds": [
+      "user_mock_123",
+      "friend_1",
+      "friend_2",
+      "friend_3"
+    ],
+    "createdAt": "2025-11-16T11:55:45.217Z"
+  },
+  {
+    "id": "cg_f7891s8",
+    "name": "sickest movies",
+    "ownerId": "user_mock_123",
+    "memberIds": [
+      "user_mock_123",
+      "friend_1"
+    ],
+    "createdAt": "2025-11-16T13:28:22.645Z"
+  }
+]
