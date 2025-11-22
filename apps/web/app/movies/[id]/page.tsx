@@ -1,22 +1,32 @@
 /**
- * Movie Detail Page (Stub)
+ * Movie Detail Page
  * 
- * Displays detailed information about a movie.
+ * Displays comprehensive information about a movie including:
+ * - Hero section with backdrop and poster
+ * - Movie metadata (genres, runtime, etc.)
+ * - Cast members
+ * - Similar movies
+ * - Action buttons (Share, Watchlist)
  * 
- * TODO: Enhance with full movie details, cast, reviews, etc.
- * TODO: Add watchlist functionality
- * TODO: Add rating functionality
+ * This page is modular and can be easily extended with additional sections.
+ * 
+ * Architecture:
+ * - Server component for data fetching
+ * - Modular components in components/movie/ directory
+ * - Follows existing design patterns (Card, Badge, etc.)
  */
 
 import React from 'react'
 import { getMovieById } from '@/lib/tmdb'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getTMDBImageUrl } from '@/lib/tmdb'
+import { MovieHero } from '@/components/movie/MovieHero'
+import { MovieMetadata } from '@/components/movie/MovieMetadata'
+import { MovieCast } from '@/components/movie/MovieCast'
+import { MovieActions } from '@/components/movie/MovieActions'
+import { MovieSimilar } from '@/components/movie/MovieSimilar'
+import { BackButton } from '@/components/movie/BackButton'
 
 interface MoviePageProps {
   params: { id: string }
@@ -32,80 +42,42 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
   let movie
   try {
-    movie = await getMovieById(movieId)
+    // Fetch movie with credits and similar movies
+    movie = await getMovieById(movieId, true)
   } catch (error) {
     console.error('Error fetching movie:', error)
     notFound()
   }
 
+  const similarMovies = movie.similar?.results || []
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <Link href="/cinegroups">
-        <Button variant="ghost" size="sm">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to CineGroups
-        </Button>
-      </Link>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          <Card>
-            <div className="relative aspect-[2/3] bg-muted rounded-t-lg overflow-hidden">
-              {movie.poster_path ? (
-                <Image
-                  src={getTMDBImageUrl(movie.poster_path, 'w500') || '/placeholder.jpg'}
-                  alt={movie.title}
-                  fill
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.src = '/placeholder.jpg'
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  No poster available
-                </div>
-              )}
-            </div>
-          </Card>
+    <div className="min-h-screen bg-background">
+      {/* Back Button - Fixed at top */}
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-4 lg:px-6 py-4">
+          <BackButton />
         </div>
+      </div>
 
-        <div className="md:col-span-2 space-y-4">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">{movie.title}</h1>
-            {movie.release_date && (
-              <p className="text-muted-foreground">
-                Released: {new Date(movie.release_date).toLocaleDateString()}
-              </p>
-            )}
-          </div>
+      {/* Hero Section */}
+      <MovieHero movie={movie} />
 
-          {movie.vote_average && (
-            <div className="flex items-center gap-4">
-              <div>
-                <span className="text-2xl font-bold">{movie.vote_average.toFixed(1)}</span>
-                <span className="text-muted-foreground">/10</span>
-              </div>
-              {movie.vote_count && (
-                <span className="text-sm text-muted-foreground">
-                  {movie.vote_count.toLocaleString()} votes
-                </span>
-              )}
-            </div>
-          )}
+      {/* Main Content */}
+      <div className="container mx-auto px-4 lg:px-6 py-6 space-y-6">
+        {/* Action Buttons */}
+        <MovieActions movie={movie} />
 
-          <Card>
-            <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold mb-2">Overview</h2>
-              <p className="text-muted-foreground">
-                {movie.overview || 'No overview available.'}
-              </p>
-            </CardContent>
-          </Card>
+        {/* Cast Section */}
+        <MovieCast movie={movie} />
 
-          {/* TODO: Add more sections like cast, reviews, recommendations */}
-        </div>
+        {/* Additional Metadata */}
+        <MovieMetadata movie={movie} />
+
+        {/* Similar Movies */}
+        {similarMovies.length > 0 && (
+          <MovieSimilar movies={similarMovies} />
+        )}
       </div>
     </div>
   )

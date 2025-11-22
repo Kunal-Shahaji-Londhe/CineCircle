@@ -21,6 +21,49 @@ export interface Movie {
   backdrop_path?: string | null
   vote_average?: number
   vote_count?: number
+  // Extended fields for detailed movie page
+  genres?: Genre[]
+  runtime?: number
+  tagline?: string
+  budget?: number
+  revenue?: number
+  status?: string
+  original_language?: string
+  production_companies?: ProductionCompany[]
+  credits?: Credits
+  similar?: { results: Movie[] }
+}
+
+export interface Genre {
+  id: number
+  name: string
+}
+
+export interface ProductionCompany {
+  id: number
+  name: string
+  logo_path: string | null
+}
+
+export interface Credits {
+  cast?: CastMember[]
+  crew?: CrewMember[]
+}
+
+export interface CastMember {
+  id: number
+  name: string
+  character: string
+  profile_path: string | null
+  order: number
+}
+
+export interface CrewMember {
+  id: number
+  name: string
+  job: string
+  department: string
+  profile_path: string | null
 }
 
 /**
@@ -76,21 +119,29 @@ export async function searchMovies(query: string): Promise<Movie[]> {
 
 /**
  * Get movie details by ID from TMDB API.
+ * Includes additional details like genres, runtime, cast, etc.
  * 
  * @param id - TMDB movie ID
+ * @param includeCredits - Whether to include cast and crew (default: true)
  * @returns Movie object with full details
  */
-export async function getMovieById(id: number): Promise<Movie> {
+export async function getMovieById(id: number, includeCredits: boolean = true): Promise<Movie> {
   // If access token is available, use real TMDB API
   if (TMDB_ACCESS_TOKEN) {
     try {
+      // Build append_to_response for additional data
+      const appendToResponse = includeCredits 
+        ? 'credits,similar' 
+        : 'similar'
+      
       const response = await fetch(
-        `${TMDB_BASE_URL}/movie/${id}`,
+        `${TMDB_BASE_URL}/movie/${id}?append_to_response=${appendToResponse}`,
         {
           headers: {
             'Authorization': `Bearer ${TMDB_ACCESS_TOKEN}`,
             'Content-Type': 'application/json',
           },
+          next: { revalidate: 3600 }, // Cache for 1 hour
         }
       )
 
@@ -115,6 +166,9 @@ export async function getMovieById(id: number): Promise<Movie> {
     backdrop_path: null,
     vote_average: 7.5,
     vote_count: 100,
+    genres: [{ id: 1, name: 'Action' }, { id: 2, name: 'Drama' }],
+    runtime: 120,
+    tagline: 'A mock movie tagline',
   }
 }
 

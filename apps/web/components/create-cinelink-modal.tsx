@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -32,13 +32,19 @@ interface CreateCineLinkModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   existingCinegroupId?: string // If provided, add movies to existing group instead of creating new
+  preselectedMovie?: Movie // If provided, pre-selects this movie in the modal
 }
 
-export function CreateCineLinkModal({ open, onOpenChange, existingCinegroupId }: CreateCineLinkModalProps) {
+export function CreateCineLinkModal({ 
+  open, 
+  onOpenChange, 
+  existingCinegroupId,
+  preselectedMovie 
+}: CreateCineLinkModalProps) {
   const [selectedFriends, setSelectedFriends] = useState<Friend[]>([])
   const [boardName, setBoardName] = useState("")
   const [message, setMessage] = useState("")
-  const [selectedMovies, setSelectedMovies] = useState<Movie[]>([])
+  const [selectedMovies, setSelectedMovies] = useState<Movie[]>(preselectedMovie ? [preselectedMovie] : [])
   const [isMovieModalOpen, setIsMovieModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
@@ -47,10 +53,17 @@ export function CreateCineLinkModal({ open, onOpenChange, existingCinegroupId }:
     setSelectedFriends([])
     setBoardName("")
     setMessage("")
-    setSelectedMovies([])
+    setSelectedMovies(preselectedMovie ? [preselectedMovie] : [])
     setError("")
     setIsSubmitting(false)
   }
+
+  // Update selectedMovies when preselectedMovie changes
+  useEffect(() => {
+    if (preselectedMovie && open) {
+      setSelectedMovies([preselectedMovie])
+    }
+  }, [preselectedMovie, open])
 
   const handleClose = (open: boolean) => {
     if (!open) {
